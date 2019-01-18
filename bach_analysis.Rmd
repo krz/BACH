@@ -1,0 +1,101 @@
+---
+title: "Causal Impact of Bariatric Surgery - Analysis"
+author: "Christoph Kurz"
+date: "January 16, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data and Packages
+
+```{r, message =F, warning=F}
+library(CausalImpact)
+library(dplyr)
+library(ggplot2)
+library(tableone)
+load("~/ownCloud/docs/papers/bach/code/markdown/bach_data.RData")
+```
+
+## Summary Statistics
+
+```{r }
+CreateTableOne(data = ops2)
+```
+
+## Medication Costs
+
+```{r }
+pre.period <- c(1, 7)
+post.period <- c(8, 18)
+impact1 <- CausalImpact(arzcost2[,c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000))
+```
+
+```{r , warning = F}
+impact1
+plot(impact1)
+```
+
+## Physician Costs
+
+```{r }
+impact2 <- CausalImpact(arztcost2[,c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000, nseasons = 1))
+```
+
+```{r , warning = F}
+impact2
+plot(impact2)
+```
+
+## Hospital Costs
+
+```{r }
+impact3 <- CausalImpact(khcost[,c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000))
+```
+
+```{r , warning = F}
+impact3
+plot(impact3)
+```
+
+## Sensitivity Analysis
+
+For this sensitivity analysis we define an imaginary intervention during the pre-intervention phase.
+
+### Medication
+
+```{r }
+pre.period <- c(1, 5)
+post.period <- c(6, 7)
+impact1_sens <- CausalImpact(arzcost2[-c(8:18),c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000))
+```
+
+```{r }
+impact1_sens
+plot(impact1_sens)
+```
+
+### Physician Costs
+
+```{r }
+impact2_sens <- CausalImpact(arztcost2[-c(8:18),c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000, nseasons = 1))
+```
+
+```{r , warning = F}
+impact2_sens
+plot(impact2_sens)
+```
+
+### Hospital Costs
+
+```{r }
+impact3_sens <- CausalImpact(khcost[-c(8:18),c(2,6,7,8,9,10)], pre.period, post.period, model.args = list(niter = 2000))
+```
+
+```{r , warning = F}
+impact3_sens
+plot(impact3_sens)
+```
+
